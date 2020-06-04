@@ -1,0 +1,3463 @@
+Script started on 2020-02-27 18:43:51-05:00 [TERM="xterm-256color" TTY="/dev/pts/3" COLUMNS="80" LINES="24"]
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest bttest indextest jointest sorttest sortmerge
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+HFTest.java:839: error: reference to Map is ambiguous
+  public DummyRecord(Map _amap) 
+                     ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:122: error: reference to DummyRecord is ambiguous
+	DummyRecord rec = new DummyRecord(reclen);
+	                  ^
+  both constructor DummyRecord(int) in DummyRecord and constructor DummyRecord(Map) in DummyRecord match
+HFTest.java:186: error: reference to Map is ambiguous
+      Map map = new Map();
+      ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:186: error: reference to Map is ambiguous
+      Map map = new Map();
+                    ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:302: error: reference to Map is ambiguous
+      Map map = new Map();
+      ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:302: error: reference to Map is ambiguous
+      Map map = new Map();
+                    ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:366: error: reference to Map is ambiguous
+      Map map = new Map();
+      ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:366: error: reference to Map is ambiguous
+      Map map = new Map();
+                    ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:446: error: reference to Map is ambiguous
+      Map map = new Map();
+      ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:446: error: reference to Map is ambiguous
+      Map map = new Map();
+                    ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:472: error: reference to Map is ambiguous
+	  Map newMap = null; 
+	  ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:475: error: reference to Map is ambiguous
+		  newMap = new Map (rec.toByteArray(),0); 
+		               ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:531: error: reference to Map is ambiguous
+      Map map = new Map(); 
+      ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:531: error: reference to Map is ambiguous
+      Map map = new Map(); 
+                    ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:532: error: reference to Map is ambiguous
+      Map map2 = new Map(); 
+      ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:532: error: reference to Map is ambiguous
+      Map map2 = new Map(); 
+                     ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:558: error: cannot find symbol
+	    map2 = f.getRecord( mid ); 
+	            ^
+  symbol:   method getRecord(MID)
+  location: variable f of type Heapfile
+HFTest.java:641: error: reference to Map is ambiguous
+      Map map = new Map();
+      ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:641: error: reference to Map is ambiguous
+      Map map = new Map();
+                    ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:666: error: reference to Map is ambiguous
+	  Map newMap = null;
+	  ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:669: error: reference to Map is ambiguous
+		newMap = new Map(rec.toByteArray(), 0);
+		             ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:708: error: reference to Map is ambiguous
+	Map newMap = null;
+	^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+HFTest.java:711: error: reference to Map is ambiguous
+		newMap = new Map(rec.toByteArray(), 0);
+		             ^
+  both class bigt.Map in bigt and interface java.util.Map in java.util match
+23 errors
+make[1]: *** [Makefile:28: HFTest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ vim Makefile 
+[?2004h[?1049h[22;0;0t[?1h=[?2004h[1;24r[?12h[?12l[22;2t[22;1t[27m[23m[29m[m[H[2J[?25l[24;1H"Makefile" 49L, 1299C[2;1H▽[6n[2;1H  [1;1H[>c]10;?]11;?[1;1H[34m#This Makefile is used to create assignments.
+
+#the following macros should be updated according to
+#the assignment to be generated[m
+
+[36mJARFILES[m=bufmgr/*.class diskmgr/*.class global/*.class iterator/*.class[35m\
+         [mheap/*.class chainexception/*.class  btree/*.class index/*.class tests//[8;1H*.class
+
+[36mJDKPATH [m= /usr/lib/jvm/java-8-openjdk-amd64
+[36mLIBPATH [m= .:..
+[36mCLASSPATH [m= [36m$(LIBPATH)
+BINPATH [m= [36m$(JDKPATH)[m/bin
+[36mJAVAC [m= [36m$(JDKPATH)[m/bin/javac -classpath [36m$(CLASSPATH)
+JAVA  [m= [36m$(JDKPATH)[m/bin/java  -classpath [36m$(CLASSPATH)
+
+DOCFILES[m=bufmgr diskmgr global chainexception heap btree iterator index
+
+[34m##############  update the above for each assignment in making[m
+
+[36mASSIGN[m=/home/hp/Documents/Spring 2020/DBMSI/Project_0/minjava/javaminibase/src
+[36mLIBDIR[m=[36m$(ASSIGN)[m/lib
+[36mKEY[m=[36m$(ASSIGN)[m/key[24;63H1,1[11CTop[1;1H[?25hP+q436f\P+q6b75\P+q6b64\P+q6b72\P+q6b6c\P+q2332\P+q2334\P+q2569\P+q2a37\P+q6b31\[27m[23m[29m[m[H[2J[?25l[1;1H[96m#This Makefile is used to create assignments.
+
+#the following macros should be updated according to
+#the assignment to be generated[m
+
+[1m[96mJARFILES[m=bufmgr/*.class diskmgr/*.class global/*.class iterator/*.class[38;5;224m\
+         [mheap/*.class chainexception/*.class  btree/*.class index/*.class tests//[8;1H*.class
+
+[1m[96mJDKPATH [m= /usr/lib/jvm/java-8-openjdk-amd64
+[1m[96mLIBPATH [m= .:..
+[1m[96mCLASSPATH [m= [1m[96m$(LIBPATH)
+BINPATH [m= [1m[96m$(JDKPATH)[m/bin
+[1m[96mJAVAC [m= [1m[96m$(JDKPATH)[m/bin/javac -classpath [1m[96m$(CLASSPATH)
+JAVA  [m= [1m[96m$(JDKPATH)[m/bin/java  -classpath [1m[96m$(CLASSPATH)
+
+DOCFILES[m=bufmgr diskmgr global chainexception heap btree iterator index
+
+[96m##############  update the above for each assignment in making[m
+
+[1m[96mASSIGN[m=/home/hp/Documents/Spring 2020/DBMSI/Project_0/minjava/javaminibase/src
+[1m[96mLIBDIR[m=[1m[96m$(ASSIGN)[m/lib
+[1m[96mKEY[m=[1m[96m$(ASSIGN)[m/key[24;63H1,1[11CTop"Makefile" 49L, 1299C[1;1H[?25h[?25l[24;53Hi[1;1H[24;53H [1;1H[24;1H[1m-- INSERT --[m[24;13H[K[24;63H1,1[11CTop[1;1H[?25h[?25l[24;63H2[2;1H[?25h[?25l[24;63H3[3;1H[?25h[?25l[24;63H4[4;1H[?25h[?25l[24;63H5[5;1H[?25h[?25l[24;63H6[6;1H[?25h[?25l[24;63H7[7;1H[?25h[?25l[24;63H8[9;1H[?25h[?25l[24;63H9[10;1H[?25h[?25l[24;63H10,1[11;1H[?25h[?25l[24;64H1[12;1H[?25h[?25l[24;64H2[13;1H[?25h[?25l[24;64H3[14;1H[?25h[?25l[24;64H4[15;1H[?25h[?25l[24;64H5[16;1H[?25h[?25l[24;64H6[17;1H[?25h[?25l[24;64H7[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[1m[96mSRC[m=[1m[96m$(ASSIGN)[m/src[24;63H[K[24;63H18,1[11C3%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[24;63H[K[24;63H19,1[11C7%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[1m[96mIMAGELINK[m=[1m[96m$(PACKAGEINDEX)[m/images[24;63H[K[24;63H20,1[10C11%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[1m[96mPACKAGEINDEX[m=[1m[96m$(ASSIGN)[m/javadoc[24;63H[K[24;63H21,1[10C14%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[24;63H[K[24;63H22,1[10C18%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[1m[96mJAVADOC[m=javadoc -public -d [1m[96m$(PACKAGEINDEX)[m[24;63H[K[24;63H23,1[10C22%[18;1H[?25h[?25l[1;23r[1;1H[2M[1;24r[23;1H[96m### Generate jar and javadoc files.  Apply to most assignments.[m[24;63H[K[24;63H24,1[10C26%[17;1H[?25h[?25l[24;64H5[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[1m[96mdb: [m[24;63H[K[24;63H26,1[10C30%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[95m        make -C global[m[24;63H[K[24;63H27,1[10C34%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[95m        make -C chainexception[m[24;63H[K[24;63H28,1[10C38%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[95m        make -C btree[m[24;63H[K[24;63H29,1[10C42%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[95m        make -C bufmgr[m[24;63H[K[24;63H30,1[10C46%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[95m        make -C diskmgr[m[24;63H[K[24;63H31,1[10C50%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[95m        make -C heap[m[24;63H[K[24;63H32,1[10C53%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[95m        make -C index[m[24;63H[K[24;63H33,1[10C57%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[95m        make -C iterator[m[24;63H[K[24;63H34,1[10C61%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[95m        [m[24;63H[K[24;63H35,1[10C65%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[1m[96mdoc:[m[24;63H[K[24;63H36,1[10C69%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[95m        [m[1m[96m$(JAVADOC)[m[95m [m[1m[96m$(DOCFILES)[m[24;63H[K[24;63H37,1[10C73%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[24;63H[K[24;63H38,1[10C76%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[1m[96mtest: [m[24;63H[K[24;63H39,1[10C80%[18;1H[?25h[?25l[1;23r[1;1H[2M[1;24r[22;1H[95m        cd tests; make bmtest dbtest; whoami; make hftest bttest indextest jointt[23;1Hest sorttest sortmerge[m[24;63H[K[24;63H40,1[10C85%[17;1H[?25h[?25l[24;64H1[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[24;63H[K[24;63H42,1[10C88%[18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[1m[96mclean:[m[24;63H[K[24;63H43,1[10C92%[18;1H[?25h[?25l[24;64H2[17;1H[?25h[?25l[24;64H1[16;1H[?25h[?25l[24;64H0[15;1H[?25h[?25l[24;63H39[14;1H[?25h[?25l[24;64H8[13;1H[?25h[?25l[24;64H7[12;1H[?25h[?25l[24;64H6[11;1H[?25h[?25l[24;64H5[10;1H[?25h[?25l[24;64H4[9;1H[?25h[?25l[24;64H3[8;1H[?25h[?25l[24;64H2[7;1H[?25h[?25l[24;64H1[6;1H[?25h[?25l[24;66H2[6;2H[?25h[?25l[24;66H3[6;3H[?25h[?25l[24;66H4[6;4H[?25h[?25l[24;66H5[6;5H[?25h[?25l[24;64H2,1[7;1H[?25h[?25l[24;66H2-9[7;9H[?25h[?25l[24;66H3-10[7;10H[?25h[?25l[24;66H4-11[7;11H[?25h[?25l[24;66H3-10[7;10H[?25h[?25l[24;66H2-9 [7;9H[?25h[?25l[24;66H1  [7;1H[?25h[?25l[24;66H2-9[7;9H[?25h[?25l[24;64H3[8;9H[?25h[?25l[24;66H1  [8;1H[?25h[?25l[24;66H2-9[8;9H[?25h[?25l[24;64H4[9;9H[?25h[?25l[95m/make -C btree[m[24;66H3-10[9;10H[?25h[?25l[95m/make -C btree[m[24;66H4-11[9;11H[?25h[?25l[95mmake -C btre[m[9;23H[K[24;66H3-10[9;10H[?25h[?25l[95mmake -C btre[m[9;22H[K[24;66H2-9 [9;9H[?25h[?25l[95m.make -C btree[m[24;66H3-10[9;10H[?25h[?25l[95m*make -C btree[m[24;66H4-11[9;11H[?25h[?25l[95mmake -C btre[m[9;23H[K[24;66H3-10[9;10H[?25h[?25l[95mmake -C btre[m[9;22H[K[24;66H2-9 [9;9H[?25h[?25l[95m/make -C btree[m[24;66H3-10[9;10H[?25h[?25l[95m*make -C btree[m[24;66H4-11[9;11H[?25h[?25l[95mmake -C btre[m[9;23H[K[24;66H3-10[9;10H[?25h[?25l[95mmake -C btre[m[9;22H[K[24;66H2-9 [9;9H[?25h[?25l[96m#make -C btree[m[24;66H3-10[9;10H[?25h[?25l[24;64H5[10;10H[?25h[?25l[24;66H2-9 [10;9H[?25h[?25l[96m#make -C bufmgr[m[24;66H3-10[10;10H[?25h[?25l[24;64H6[11;10H[?25h[?25l[24;66H2-9 [11;9H[?25h[?25l[24;64H5[10;9H[?25h[?25l[24;66H3-10[10;10H[?25h[?25l[95mmake -C bufmgr[m[10;23H[K[24;66H2-9 [10;9H[?25h[?25l[24;64H4[9;9H[?25h[?25l[24;66H3-10[9;10H[?25h[?25l[95mmake -C btree[m[9;22H[K[24;66H2-9 [9;9H[?25h[?25l[24;64H5[10;9H[?25h[?25l[24;64H6[11;9H[?25h[?25l[24;64H7[12;9H[?25h[?25l[24;64H8[13;9H[?25h[?25l[24;64H9[14;9H[?25h[?25l[24;63H40[15;9H[?25h[?25l[24;64H1,5  [16;5H[?25h[?25l[24;64H2,2-9[17;9H[?25h[?25l[24;64H3,1  [18;1H[?25h[?25l[1;23r[23;1H
+[1;24r[23;1H[95m        \rm -f [m[1m[96m$(CLASSPATH)[m[95m/*.class *~ \[m[96m#* core $(JARFILES) TRACE[m[24;63H[K[24;63H44,7[10C96%[18;7H[?25h[?25l[1;23r[23;1H
+[1;24r[24;63H[K[24;63H45,2-9[8CBot[18;9H[?25h[?25l[24;64H6,1  [20;1H[?25h[?25l[24;64H7,7[21;7H[?25h[?25l[24;64H8,2-9[22;9H[?25h[?25l[24;64H9,1  [23;1H[?25h[?25l[24;64H8,2-9[22;9H[?25h[?25l[24;64H7,7  [21;7H[?25h[?25l[24;64H6,1[20;1H[?25h[?25l[24;64H5,2-9[18;9H[?25h[?25l[24;66H3-10[18;10H[?25h[?25l[24;66H4-11[18;11H[?25h[?25l[24;66H5-12[18;12H[?25h[?25l[24;66H6-13[18;13H[?25h[?25l[24;66H7-14[18;14H[?25h[?25l[24;66H8-15[18;15H[?25h[?25l[24;66H9-16[18;16H[?25h[?25l[24;66H10-17[18;17H[?25h[?25l[24;67H1-18[18;18H[?25h[?25l[24;67H2-19[18;19H[?25h[?25l[24;67H3-20[18;20H[?25h[?25l[24;67H4-21[18;21H[?25h[?25l[24;67H5-22[18;22H[?25h[?25l[24;67H6-23[18;23H[?25h[?25l[24;67H7-24[18;24H[?25h[?25l[24;67H8-25[18;25H[?25h[?25l[24;67H9-26[18;26H[?25h[?25l[24;66H20-27[18;27H[?25h[?25l[24;67H1-28[18;28H[?25h[?25l[24;67H2-29[18;29H[?25h[?25l[24;67H3-30[18;30H[?25h[?25l[24;67H4-31[18;31H[?25h[?25l[24;67H5-32[18;32H[?25h[?25l[24;67H6-33[18;33H[?25h[?25l[24;67H7-34[18;34H[?25h[?25l[24;67H8-35[18;35H[?25h[?25l[24;67H9-36[18;36H[?25h[?25l[24;66H30-37[18;37H[?25h[?25l[24;67H1-38[18;38H[?25h[?25l[24;67H2-39[18;39H[?25h[?25l[24;67H3-40[18;40H[?25h[?25l[24;67H4-41[18;41H[?25h[?25l[24;67H5-42[18;42H[?25h[?25l[24;67H6-43[18;43H[?25h[?25l[24;67H7-44[18;44H[?25h[?25l[24;67H8-45[18;45H[?25h[?25l[24;67H9-46[18;46H[?25h[?25l[24;66H40-47[18;47H[?25h[?25l[24;67H1-48[18;48H[?25h[?25l[24;67H2-49[18;49H[?25h[?25l[24;67H3-50[18;50H[?25h[?25l[24;67H4-51[18;51H[?25h[?25l[24;67H5-52[18;52H[?25h[?25l[24;67H6-53[18;53H[?25h[?25l[24;67H7-54[18;54H[?25h[?25l[24;67H8-55[18;55H[?25h[?25l[24;67H9-56[18;56H[?25h[?25l[24;66H50-57[18;57H[?25h[?25l[24;67H1-58[18;58H[?25h[?25l[24;67H2-59[18;59H[?25h[?25l[24;67H3-60[18;60H[?25h[?25l[24;67H4-61[18;61H[?25h[?25l[24;67H5-62[18;62H[?25h[?25l[24;67H6-63[18;63H[?25h[?25l[24;67H7-64[18;64H[?25h[?25l[24;67H8-65[18;65H[?25h[?25l[24;67H9-66[18;66H[?25h[?25l[24;66H60-67[18;67H[?25h[?25l[24;67H1-68[18;68H[?25h[?25l[24;67H2-69[18;69H[?25h[?25l[24;67H3-70[18;70H[?25h[?25l[24;67H4-71[18;71H[?25h[?25l[24;67H5-72[18;72H[?25h[?25l[24;67H6-73[18;73H[?25h[?25l[24;67H7-74[18;74H[?25h[?25l[24;67H8-75[18;75H[?25h[?25l[24;67H9-76[18;76H[?25h[?25l[24;66H70-77[18;77H[?25h[?25l[24;67H1-78[18;78H[?25h[?25l[24;67H2-79[18;79H[?25h[?25l[24;67H3-80[18;80H[?25h[?25l[24;67H4-81[19;1H[?25h[?25l[24;67H5-82[19;2H[?25h[?25l[24;67H6-83[19;3H[?25h[?25l[24;67H7-84[19;4H[?25h[?25l[24;67H8-85[19;5H[?25h[?25l[24;67H9-86[19;6H[?25h[?25l[24;66H80-87[19;7H[?25h[?25l[24;67H1-88[19;8H[?25h[?25l[24;67H2-89[19;9H[?25h[?25l[24;67H3-90[19;10H[?25h[?25l[24;67H4-91[19;11H[?25h[?25l[24;67H5-92[19;12H[?25h[?25l[24;67H6-93[19;13H[?25h[?25l[24;67H7-94[19;14H[?25h[?25l[24;67H8-95[19;15H[?25h[?25l[24;67H9-96[19;16H[?25h[?25l[24;66H90-97[19;17H[?25h[?25l[24;67H1-98[19;18H[?25h[?25l[24;67H2-99[19;19H[?25h[?25l[24;67H3-100[19;20H[?25h[?25l[24;67H4-101[19;21H[?25h[?25l[24;67H5-102[19;22H[?25h[?25l[24;67H6-103[19;23H[?25h[?25l[19;22H[K[24;67H5-102[19;22H[?25h[?25l[19;21H[K[24;67H4-101[19;21H[?25h[?25l[19;20H[K[24;67H3-100[19;20H[?25h[?25l[19;19H[K[24;67H2-99 [19;19H[?25h[?25l[19;18H[K[24;67H1-98[19;18H[?25h[?25l[19;17H[K[24;67H0-97[19;17H[?25h[?25l[19;16H[K[24;66H89-96[19;16H[?25h[?25l[19;15H[K[24;67H8-95[19;15H[?25h[?25l[19;14H[K[24;67H7-94[19;14H[?25h[?25l[19;13H[K[24;67H6-93[19;13H[?25h[?25l[19;12H[K[24;67H5-92[19;12H[?25h[?25l[19;11H[K[24;67H4-91[19;11H[?25h[?25l[19;10H[K[24;67H3-90[19;10H[?25h[?25l[19;9H[K[24;67H2-89[19;9H[?25h[?25l[19;8H[K[24;67H1-88[19;8H[?25h[?25l[19;7H[K[24;67H0-87[19;7H[?25h[?25l[19;6H[K[24;66H79-86[19;6H[?25h[?25l[19;5H[K[24;67H8-85[19;5H[?25h[?25l[19;4H[K[24;67H7-84[19;4H[?25h[?25l[19;3H[K[24;67H6-83[19;3H[?25h[?25l[19;2H[K[24;67H5-82[19;2H[?25h[?25l[18;23r[23;1H
+[1;24r[18;1H[95m        cd tests; make bmtest dbtest; whoami; make hftest bttest indextest joint[m[23;1H[94m~                                                                               [m[24;63H[K[24;63H45,74-81      Bot[19;1H[?25h[?25l[18;80H[K[24;67H3-80[18;80H[?25h[?25l[18;79H[K[24;67H2-79[18;79H[?25h[?25l[18;78H[K[24;67H1-78[18;78H[?25h[?25l[18;77H[K[24;67H0-77[18;77H[?25h[?25l[18;76H[K[24;66H69-76[18;76H[?25h[?25l[18;75H[K[24;67H8-75[18;75H[?25h[?25l[18;74H[K[24;67H7-74[18;74H[?25h[?25l[18;73H[K[24;67H6-73[18;73H[?25h[?25l[18;72H[K[24;67H5-72[18;72H[?25h[?25l[18;71H[K[24;67H4-71[18;71H[?25h[?25l[18;70H[K[24;67H3-70[18;70H[?25h[?25l[18;69H[K[24;67H2-69[18;69H[?25h[?25l[18;68H[K[24;67H1-68[18;68H[?25h[?25l[18;67H[K[24;67H0-67[18;67H[?25h[?25l[18;66H[K[24;66H59-66[18;66H[?25h[?25l[18;65H[K[24;67H8-65[18;65H[?25h[?25l[18;64H[K[24;67H7-64[18;64H[?25h[?25l[18;63H[K[24;67H6-63[18;63H[?25h[?25l[18;62H[K[24;67H5-62[18;62H[?25h[?25l[18;61H[K[24;67H4-61[18;61H[?25h[?25l[18;60H[K[24;67H3-60[18;60H[?25h[?25l[18;59H[K[24;67H2-59[18;59H[?25h[?25l[18;58H[K[24;67H1-58[18;58H[?25h[24;1H[K[18;57H[?25l[24;53H^[[18;57H[24;53H  [18;58H[24;63H45,50-57      Bot[18;57H[?25h[?25l[24;53H:[18;57H[24;53H[K[24;1H:[?2004h[?25hw[?25l[?25hq[?25l[?25h![?25l[?25h[?25l[?2004l"Makefile" 49L, 1254C written[23;2t[23;1t[22;2t[22;1t[23;2t[23;1t
+[?2004l[?1l>[?25h[?1049l[23;0;0t]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ 
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ vim Makefile [4Pmake test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 100 records to the file
+
+  - Scan the records just inserted
+
+Exception in thread "main" java.lang.Error: Unresolved compilation problems: 
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	The final field fldOffset may already have been assigned
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	Unhandled exception type IOException
+	The final field Map.map_length cannot be assigned
+	The final field Map.map_length cannot be assigned
+
+	at bigt.Map.<init>(Map.java:56)
+	at tests.HFDriver.test1(HFTest.java:186)
+	at tests.HFDriver.runAllTests(HFTest.java:783)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:907)
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+HFTest.java:186: error: unreported exception IOException; must be caught or declared to be thrown
+      Map map = new Map();
+                ^
+HFTest.java:302: error: unreported exception IOException; must be caught or declared to be thrown
+      Map map = new Map();
+                ^
+HFTest.java:366: error: unreported exception IOException; must be caught or declared to be thrown
+      Map map = new Map();
+                ^
+HFTest.java:446: error: unreported exception IOException; must be caught or declared to be thrown
+      Map map = new Map();
+                ^
+HFTest.java:531: error: unreported exception IOException; must be caught or declared to be thrown
+      Map map = new Map(); 
+                ^
+HFTest.java:532: error: unreported exception IOException; must be caught or declared to be thrown
+      Map map2 = new Map(); 
+                 ^
+HFTest.java:641: error: unreported exception IOException; must be caught or declared to be thrown
+      Map map = new Map();
+                ^
+7 errors
+make[1]: *** [Makefile:28: HFTest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 100 records to the file
+
+  - Scan the records just inserted
+
+java.lang.ArrayIndexOutOfBoundsException
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at bigt.Map.getMapByteArray(Map.java:200)
+	at tests.DummyRecord.<init>(HFTest.java:842)
+	at tests.HFDriver.test1(HFTest.java:204)
+	at tests.HFDriver.runAllTests(HFTest.java:783)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:907)
+*** Record 0 had unexpected length 112
+
+
+  Test 2: Delete fixed-size records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+*** Error deleting record 1
+
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at heap.HFPage.deleteRecord(HFPage.java:427)
+	at heap.Heapfile.deleteRecord(Heapfile.java:658)
+	at tests.HFDriver.test2(HFTest.java:323)
+	at tests.HFDriver.runAllTests(HFTest.java:784)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:907)
+
+  Test 3: Update fixed-size records
+
+  - Open the same heap file as tests 1 and 2
+
+  - Change the records
+
+java.lang.ArrayIndexOutOfBoundsException
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at bigt.Map.getMapByteArray(Map.java:200)
+	at tests.DummyRecord.<init>(HFTest.java:842)
+	at tests.HFDriver.test3(HFTest.java:463)
+	at tests.HFDriver.runAllTests(HFTest.java:785)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:907)
+Exception in thread "main" java.lang.NullPointerException
+	at tests.HFDriver.test3(HFTest.java:470)
+	at tests.HFDriver.runAllTests(HFTest.java:785)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:907)
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 100 records to the file
+
+  - Scan the records just inserted
+
+java.lang.ArrayIndexOutOfBoundsException
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at bigt.Map.getMapByteArray(Map.java:200)
+	at tests.DummyRecord.<init>(HFTest.java:842)
+	at tests.HFDriver.test1(HFTest.java:204)
+	at tests.HFDriver.runAllTests(HFTest.java:783)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:907)
+*** Record 0 had unexpected length 3094
+
+
+  Test 2: Delete fixed-size records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+*** Error deleting record 1
+
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at heap.HFPage.deleteRecord(HFPage.java:427)
+	at heap.Heapfile.deleteRecord(Heapfile.java:658)
+	at tests.HFDriver.test2(HFTest.java:323)
+	at tests.HFDriver.runAllTests(HFTest.java:784)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:907)
+
+  Test 3: Update fixed-size records
+
+  - Open the same heap file as tests 1 and 2
+
+  - Change the records
+
+java.lang.ArrayIndexOutOfBoundsException
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at bigt.Map.getMapByteArray(Map.java:200)
+	at tests.DummyRecord.<init>(HFTest.java:842)
+	at tests.HFDriver.test3(HFTest.java:463)
+	at tests.HFDriver.runAllTests(HFTest.java:785)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:907)
+Exception in thread "main" java.lang.NullPointerException
+	at tests.HFDriver.test3(HFTest.java:470)
+	at tests.HFDriver.runAllTests(HFTest.java:785)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:907)
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make testvim Makefile [4Pmake test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 100 records to the file
+
+  - Scan the records just inserted
+
+  Test 1 completed successfully.
+
+
+...Heap File tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 100 records to the file
+
+  - Scan the records just inserted
+
+  Test 1 completed successfully.
+
+
+  Test 2: Delete fixed-size records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+*** Error deleting record 1
+
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at heap.HFPage.deleteRecord(HFPage.java:427)
+	at heap.Heapfile.deleteRecord(Heapfile.java:658)
+	at tests.HFDriver.test2(HFTest.java:325)
+	at tests.HFDriver.runAllTests(HFTest.java:809)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:944)
+
+...Heap File tests failed.
+
+Error encountered during buffer manager tests:
+
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 100 records to the file
+
+  - Scan the records just inserted
+
+row ---------------------->>value0
+row ---------------------->>value1
+row ---------------------->>value2
+row ---------------------->>value3
+row ---------------------->>value4
+row ---------------------->>value5
+row ---------------------->>value6
+row ---------------------->>value7
+row ---------------------->>value8
+row ---------------------->>value9
+row ---------------------->>value10
+row ---------------------->>value11
+row ---------------------->>value12
+row ---------------------->>value13
+row ---------------------->>value14
+row ---------------------->>value15
+row ---------------------->>value16
+row ---------------------->>value17
+row ---------------------->>value18
+row ---------------------->>value19
+row ---------------------->>value20
+row ---------------------->>value21
+row ---------------------->>value22
+row ---------------------->>value23
+row ---------------------->>value24
+row ---------------------->>value25
+row ---------------------->>value26
+row ---------------------->>value27
+row ---------------------->>value28
+row ---------------------->>value29
+row ---------------------->>value30
+row ---------------------->>value31
+row ---------------------->>value32
+row ---------------------->>value33
+row ---------------------->>value34
+row ---------------------->>value35
+row ---------------------->>value36
+row ---------------------->>value37
+row ---------------------->>value38
+row ---------------------->>value39
+row ---------------------->>value40
+row ---------------------->>value41
+row ---------------------->>value42
+row ---------------------->>value43
+row ---------------------->>value44
+row ---------------------->>value45
+row ---------------------->>value46
+row ---------------------->>value47
+row ---------------------->>value48
+row ---------------------->>value49
+row ---------------------->>value50
+row ---------------------->>value51
+row ---------------------->>value52
+row ---------------------->>value53
+row ---------------------->>value54
+row ---------------------->>value55
+row ---------------------->>value56
+row ---------------------->>value57
+row ---------------------->>value58
+row ---------------------->>value59
+row ---------------------->>value60
+row ---------------------->>value61
+row ---------------------->>value62
+row ---------------------->>value63
+row ---------------------->>value64
+row ---------------------->>value65
+row ---------------------->>value66
+row ---------------------->>value67
+row ---------------------->>value68
+row ---------------------->>value69
+row ---------------------->>value70
+row ---------------------->>value71
+row ---------------------->>value72
+row ---------------------->>value73
+row ---------------------->>value74
+row ---------------------->>value75
+row ---------------------->>value76
+row ---------------------->>value77
+row ---------------------->>value78
+row ---------------------->>value79
+row ---------------------->>value80
+row ---------------------->>value81
+row ---------------------->>value82
+row ---------------------->>value83
+row ---------------------->>value84
+row ---------------------->>value85
+row ---------------------->>value86
+row ---------------------->>value87
+row ---------------------->>value88
+row ---------------------->>value89
+row ---------------------->>value90
+row ---------------------->>value91
+row ---------------------->>value92
+row ---------------------->>value93
+row ---------------------->>value94
+row ---------------------->>value95
+row ---------------------->>value96
+row ---------------------->>value97
+row ---------------------->>value98
+row ---------------------->>value99
+  Test 1 completed successfully.
+
+
+  Test 2: Delete fixed-size records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+*** Error deleting record 1
+
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at heap.HFPage.deleteRecord(HFPage.java:427)
+	at heap.Heapfile.deleteRecord(Heapfile.java:658)
+	at tests.HFDriver.test2(HFTest.java:326)
+	at tests.HFDriver.runAllTests(HFTest.java:810)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:945)
+
+...Heap File tests failed.
+
+Error encountered during buffer manager tests:
+
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 100 records to the file
+
+  - Scan the records just inserted
+
+row ---------------------->>value0
+row ---------------------->>value1
+row ---------------------->>value2
+row ---------------------->>value3
+row ---------------------->>value4
+row ---------------------->>value5
+row ---------------------->>value6
+row ---------------------->>value7
+row ---------------------->>value8
+row ---------------------->>value9
+row ---------------------->>value10
+row ---------------------->>value11
+row ---------------------->>value12
+row ---------------------->>value13
+row ---------------------->>value14
+row ---------------------->>value15
+row ---------------------->>value16
+row ---------------------->>value17
+row ---------------------->>value18
+row ---------------------->>value19
+row ---------------------->>value20
+row ---------------------->>value21
+row ---------------------->>value22
+row ---------------------->>value23
+row ---------------------->>value24
+row ---------------------->>value25
+row ---------------------->>value26
+row ---------------------->>value27
+row ---------------------->>value28
+row ---------------------->>value29
+row ---------------------->>value30
+row ---------------------->>value31
+row ---------------------->>value32
+row ---------------------->>value33
+row ---------------------->>value34
+row ---------------------->>value35
+row ---------------------->>value36
+row ---------------------->>value37
+row ---------------------->>value38
+row ---------------------->>value39
+row ---------------------->>value40
+row ---------------------->>value41
+row ---------------------->>value42
+row ---------------------->>value43
+row ---------------------->>value44
+row ---------------------->>value45
+row ---------------------->>value46
+row ---------------------->>value47
+row ---------------------->>value48
+row ---------------------->>value49
+row ---------------------->>value50
+row ---------------------->>value51
+row ---------------------->>value52
+row ---------------------->>value53
+row ---------------------->>value54
+row ---------------------->>value55
+row ---------------------->>value56
+row ---------------------->>value57
+row ---------------------->>value58
+row ---------------------->>value59
+row ---------------------->>value60
+row ---------------------->>value61
+row ---------------------->>value62
+row ---------------------->>value63
+row ---------------------->>value64
+row ---------------------->>value65
+row ---------------------->>value66
+row ---------------------->>value67
+row ---------------------->>value68
+row ---------------------->>value69
+row ---------------------->>value70
+row ---------------------->>value71
+row ---------------------->>value72
+row ---------------------->>value73
+row ---------------------->>value74
+row ---------------------->>value75
+row ---------------------->>value76
+row ---------------------->>value77
+row ---------------------->>value78
+row ---------------------->>value79
+row ---------------------->>value80
+row ---------------------->>value81
+row ---------------------->>value82
+row ---------------------->>value83
+row ---------------------->>value84
+row ---------------------->>value85
+row ---------------------->>value86
+row ---------------------->>value87
+row ---------------------->>value88
+row ---------------------->>value89
+row ---------------------->>value90
+row ---------------------->>value91
+row ---------------------->>value92
+row ---------------------->>value93
+row ---------------------->>value94
+row ---------------------->>value95
+row ---------------------->>value96
+row ---------------------->>value97
+row ---------------------->>value98
+row ---------------------->>value99
+  Test 1 completed successfully.
+
+
+  Test 2: Delete fixed-size records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+872-------954------12
+*** Error deleting record 1
+
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at heap.HFPage.deleteRecord(HFPage.java:428)
+	at heap.Heapfile.deleteRecord(Heapfile.java:658)
+	at tests.HFDriver.test2(HFTest.java:326)
+	at tests.HFDriver.runAllTests(HFTest.java:810)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:945)
+
+...Heap File tests failed.
+
+Error encountered during buffer manager tests:
+
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 100 records to the file
+
+  - Scan the records just inserted
+
+row ---------------------->>value0
+row ---------------------->>value1
+row ---------------------->>value2
+row ---------------------->>value3
+row ---------------------->>value4
+row ---------------------->>value5
+row ---------------------->>value6
+row ---------------------->>value7
+row ---------------------->>value8
+row ---------------------->>value9
+row ---------------------->>value10
+row ---------------------->>value11
+row ---------------------->>value12
+row ---------------------->>value13
+row ---------------------->>value14
+row ---------------------->>value15
+row ---------------------->>value16
+row ---------------------->>value17
+row ---------------------->>value18
+row ---------------------->>value19
+row ---------------------->>value20
+row ---------------------->>value21
+row ---------------------->>value22
+row ---------------------->>value23
+row ---------------------->>value24
+row ---------------------->>value25
+row ---------------------->>value26
+row ---------------------->>value27
+row ---------------------->>value28
+row ---------------------->>value29
+row ---------------------->>value30
+row ---------------------->>value31
+row ---------------------->>value32
+row ---------------------->>value33
+row ---------------------->>value34
+row ---------------------->>value35
+row ---------------------->>value36
+row ---------------------->>value37
+row ---------------------->>value38
+row ---------------------->>value39
+row ---------------------->>value40
+row ---------------------->>value41
+row ---------------------->>value42
+row ---------------------->>value43
+row ---------------------->>value44
+row ---------------------->>value45
+row ---------------------->>value46
+row ---------------------->>value47
+row ---------------------->>value48
+row ---------------------->>value49
+row ---------------------->>value50
+row ---------------------->>value51
+row ---------------------->>value52
+row ---------------------->>value53
+row ---------------------->>value54
+row ---------------------->>value55
+row ---------------------->>value56
+row ---------------------->>value57
+row ---------------------->>value58
+row ---------------------->>value59
+row ---------------------->>value60
+row ---------------------->>value61
+row ---------------------->>value62
+row ---------------------->>value63
+row ---------------------->>value64
+row ---------------------->>value65
+row ---------------------->>value66
+row ---------------------->>value67
+row ---------------------->>value68
+row ---------------------->>value69
+row ---------------------->>value70
+row ---------------------->>value71
+row ---------------------->>value72
+row ---------------------->>value73
+row ---------------------->>value74
+row ---------------------->>value75
+row ---------------------->>value76
+row ---------------------->>value77
+row ---------------------->>value78
+row ---------------------->>value79
+row ---------------------->>value80
+row ---------------------->>value81
+row ---------------------->>value82
+row ---------------------->>value83
+row ---------------------->>value84
+row ---------------------->>value85
+row ---------------------->>value86
+row ---------------------->>value87
+row ---------------------->>value88
+row ---------------------->>value89
+row ---------------------->>value90
+row ---------------------->>value91
+row ---------------------->>value92
+row ---------------------->>value93
+row ---------------------->>value94
+row ---------------------->>value95
+row ---------------------->>value96
+row ---------------------->>value97
+row ---------------------->>value98
+row ---------------------->>value99
+  Test 1 completed successfully.
+
+
+  Test 2: Delete fixed-size records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+872-------954------12---------------------860
+*** Error deleting record 1
+
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at heap.HFPage.deleteRecord(HFPage.java:428)
+	at heap.Heapfile.deleteRecord(Heapfile.java:658)
+	at tests.HFDriver.test2(HFTest.java:326)
+	at tests.HFDriver.runAllTests(HFTest.java:810)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:945)
+
+...Heap File tests failed.
+
+Error encountered during buffer manager tests:
+
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 100 records to the file
+
+  - Scan the records just inserted
+
+row ---------------------->>value0
+row ---------------------->>value1
+row ---------------------->>value2
+row ---------------------->>value3
+row ---------------------->>value4
+row ---------------------->>value5
+row ---------------------->>value6
+row ---------------------->>value7
+row ---------------------->>value8
+row ---------------------->>value9
+row ---------------------->>value10
+row ---------------------->>value11
+row ---------------------->>value12
+row ---------------------->>value13
+row ---------------------->>value14
+row ---------------------->>value15
+row ---------------------->>value16
+row ---------------------->>value17
+row ---------------------->>value18
+row ---------------------->>value19
+row ---------------------->>value20
+row ---------------------->>value21
+row ---------------------->>value22
+row ---------------------->>value23
+row ---------------------->>value24
+row ---------------------->>value25
+row ---------------------->>value26
+row ---------------------->>value27
+row ---------------------->>value28
+row ---------------------->>value29
+row ---------------------->>value30
+row ---------------------->>value31
+row ---------------------->>value32
+row ---------------------->>value33
+row ---------------------->>value34
+row ---------------------->>value35
+row ---------------------->>value36
+row ---------------------->>value37
+row ---------------------->>value38
+row ---------------------->>value39
+row ---------------------->>value40
+row ---------------------->>value41
+row ---------------------->>value42
+row ---------------------->>value43
+row ---------------------->>value44
+row ---------------------->>value45
+row ---------------------->>value46
+row ---------------------->>value47
+row ---------------------->>value48
+row ---------------------->>value49
+row ---------------------->>value50
+row ---------------------->>value51
+row ---------------------->>value52
+row ---------------------->>value53
+row ---------------------->>value54
+row ---------------------->>value55
+row ---------------------->>value56
+row ---------------------->>value57
+row ---------------------->>value58
+row ---------------------->>value59
+row ---------------------->>value60
+row ---------------------->>value61
+row ---------------------->>value62
+row ---------------------->>value63
+row ---------------------->>value64
+row ---------------------->>value65
+row ---------------------->>value66
+row ---------------------->>value67
+row ---------------------->>value68
+row ---------------------->>value69
+row ---------------------->>value70
+row ---------------------->>value71
+row ---------------------->>value72
+row ---------------------->>value73
+row ---------------------->>value74
+row ---------------------->>value75
+row ---------------------->>value76
+row ---------------------->>value77
+row ---------------------->>value78
+row ---------------------->>value79
+row ---------------------->>value80
+row ---------------------->>value81
+row ---------------------->>value82
+row ---------------------->>value83
+row ---------------------->>value84
+row ---------------------->>value85
+row ---------------------->>value86
+row ---------------------->>value87
+row ---------------------->>value88
+row ---------------------->>value89
+row ---------------------->>value90
+row ---------------------->>value91
+row ---------------------->>value92
+row ---------------------->>value93
+row ---------------------->>value94
+row ---------------------->>value95
+row ---------------------->>value96
+row ---------------------->>value97
+row ---------------------->>value98
+row ---------------------->>value99
+  Test 1 completed successfully.
+
+
+  Test 2: Delete fixed-size records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+872-------954------12---------------------860
+*** Error deleting record 1
+
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at heap.HFPage.deleteRecord(HFPage.java:428)
+	at heap.Heapfile.deleteRecord(Heapfile.java:658)
+	at tests.HFDriver.test2(HFTest.java:326)
+	at tests.HFDriver.runAllTests(HFTest.java:810)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:945)
+
+...Heap File tests failed.
+
+Error encountered during buffer manager tests:
+
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 10 records to the file
+
+slotNo 0 lemgth 20 offset 22
+slotNo 0 lemgth 20 offset 22
+slotNo 1 lemgth 24 offset 26
+slotNo 2 lemgth 28 offset 30
+slotNo 3 lemgth 32 offset 34
+slotNo 4 lemgth 36 offset 38
+slotNo 5 lemgth 40 offset 42
+slotNo 6 lemgth 44 offset 46
+slotNo 7 lemgth 48 offset 50
+slotNo 8 lemgth 52 offset 54
+slotNo 9 lemgth 56 offset 58
+  - Scan the records just inserted
+
+row ---------------------->>value0
+row ---------------------->>value1
+row ---------------------->>value2
+row ---------------------->>value3
+row ---------------------->>value4
+row ---------------------->>value5
+row ---------------------->>value6
+row ---------------------->>value7
+row ---------------------->>value8
+row ---------------------->>value9
+  Test 1 completed successfully.
+
+
+  Test 2: Delete fixed-size records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+872-------954------12---------------------860
+*** Error deleting record 1
+
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at heap.HFPage.deleteRecord(HFPage.java:429)
+	at heap.Heapfile.deleteRecord(Heapfile.java:658)
+	at tests.HFDriver.test2(HFTest.java:326)
+	at tests.HFDriver.runAllTests(HFTest.java:810)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:945)
+
+...Heap File tests failed.
+
+Error encountered during buffer manager tests:
+
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 10 records to the file
+
+slotNo 0 lemgth 12 offset 1012
+slotNo 0 lemgth 82 offset 942
+slotNo 1 lemgth 82 offset 860
+slotNo 2 lemgth 82 offset 778
+slotNo 3 lemgth 82 offset 696
+slotNo 4 lemgth 82 offset 614
+slotNo 5 lemgth 82 offset 532
+slotNo 6 lemgth 82 offset 450
+slotNo 7 lemgth 82 offset 368
+slotNo 8 lemgth 82 offset 286
+slotNo 9 lemgth 82 offset 204
+  - Scan the records just inserted
+
+row ---------------------->>value0
+row ---------------------->>value1
+row ---------------------->>value2
+row ---------------------->>value3
+row ---------------------->>value4
+row ---------------------->>value5
+row ---------------------->>value6
+row ---------------------->>value7
+row ---------------------->>value8
+row ---------------------->>value9
+  Test 1 completed successfully.
+
+
+  Test 2: Delete fixed-size records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+872-------954------12---------------------860
+*** Error deleting record 1
+
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at heap.HFPage.deleteRecord(HFPage.java:429)
+	at heap.Heapfile.deleteRecord(Heapfile.java:658)
+	at tests.HFDriver.test2(HFTest.java:326)
+	at tests.HFDriver.runAllTests(HFTest.java:810)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:945)
+
+...Heap File tests failed.
+
+Error encountered during buffer manager tests:
+
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 10 records to the file
+
+0-------0
+slotNo 0 lemgth 12 offset 1012
+0-------0
+slotNo 0 lemgth 82 offset 942
+1-------1
+slotNo 1 lemgth 82 offset 860
+2-------2
+slotNo 2 lemgth 82 offset 778
+3-------3
+slotNo 3 lemgth 82 offset 696
+4-------4
+slotNo 4 lemgth 82 offset 614
+5-------5
+slotNo 5 lemgth 82 offset 532
+6-------6
+slotNo 6 lemgth 82 offset 450
+7-------7
+slotNo 7 lemgth 82 offset 368
+8-------8
+slotNo 8 lemgth 82 offset 286
+9-------9
+slotNo 9 lemgth 82 offset 204
+  - Scan the records just inserted
+
+row ---------------------->>value0
+row ---------------------->>value1
+row ---------------------->>value2
+row ---------------------->>value3
+row ---------------------->>value4
+row ---------------------->>value5
+row ---------------------->>value6
+row ---------------------->>value7
+row ---------------------->>value8
+row ---------------------->>value9
+  Test 1 completed successfully.
+
+
+  Test 2: Delete fixed-size records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+872-------954------12---------------------860
+*** Error deleting record 1
+
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at heap.HFPage.deleteRecord(HFPage.java:430)
+	at heap.Heapfile.deleteRecord(Heapfile.java:658)
+	at tests.HFDriver.test2(HFTest.java:326)
+	at tests.HFDriver.runAllTests(HFTest.java:810)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:945)
+
+...Heap File tests failed.
+
+Error encountered during buffer manager tests:
+
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ insertRecord[3Pmake test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 10 records to the file
+
+0-------0
+slotNo 0 lemgth 12 offset 1012
+0-------0
+slotNo 0 lemgth 82 offset 942
+1-------1
+slotNo 1 lemgth 82 offset 860
+2-------2
+slotNo 2 lemgth 82 offset 778
+3-------3
+slotNo 3 lemgth 82 offset 696
+4-------4
+slotNo 4 lemgth 82 offset 614
+5-------5
+slotNo 5 lemgth 82 offset 532
+6-------6
+slotNo 6 lemgth 82 offset 450
+7-------7
+slotNo 7 lemgth 82 offset 368
+8-------8
+slotNo 8 lemgth 82 offset 286
+9-------9
+slotNo 9 lemgth 82 offset 204
+  - Scan the records just inserted
+
+row ---------------------->>value0
+row ---------------------->>value1
+row ---------------------->>value2
+row ---------------------->>value3
+row ---------------------->>value4
+row ---------------------->>value5
+row ---------------------->>value6
+row ---------------------->>value7
+row ---------------------->>value8
+row ---------------------->>value9
+  Test 1 completed successfully.
+
+
+  Test 2: Delete fixed-size records
+
+  - Open the same heap file as test 1
+
+  - Delete half the records
+
+MAP
+row0
+MAP
+row1
+872-------954------12---------------------860
+*** Error deleting record 1
+
+java.lang.ArrayIndexOutOfBoundsException
+	at java.lang.System.arraycopy(Native Method)
+	at heap.HFPage.deleteRecord(HFPage.java:430)
+	at heap.Heapfile.deleteRecord(Heapfile.java:658)
+	at tests.HFDriver.test2(HFTest.java:330)
+	at tests.HFDriver.runAllTests(HFTest.java:814)
+	at tests.HFDriver.runTests(HFTest.java:76)
+	at tests.HFTest.main(HFTest.java:949)
+
+...Heap File tests failed.
+
+Error encountered during buffer manager tests:
+
+make[1]: *** [Makefile:31: hftest] Error 1
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+make: *** [Makefile:45: test] Error 2
+]0;hp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx: ~/cse510_bigtable/src[01;32mhp@hp-HP-Pavilion-Gaming-Laptop-15-dk0xxx[00m:[01;34m~/cse510_bigtable/src[00m$ make test
+cd tests; make bmtest dbtest; whoami; make hftest
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java BMTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.BMTest
+
+Running Buffer Management tests....
+Replacer: Clock
+
+
+  Test 1 does a simple test of normal buffer manager operations:
+  - Allocate a bunch of new pages
+  - Write something on each one
+  - Read that something back from each one
+   (because we're buffering, this is where most of the writes happen)
+  - Free the pages again
+  Test 1 completed successfully.
+
+  Test 2 exercises some illegal buffer manager operations:
+  - Try to pin more pages than there are frames
+*** Pinning too many pages
+  --> Failed as expected 
+
+  - Try to free a doubly-pinned page
+*** Freeing a pinned page
+  --> Failed as expected 
+
+  - Try to unpin a page not in the buffer pool
+*** Unpinning a page not in the buffer pool
+  --> Failed as expected 
+
+  Test 2 completed successfully.
+
+  Test 3 exercises some of the internals of the buffer manager
+  - Allocate and dirty some new pages, one at a time, and leave some pinned
+  - Read the pages
+  Test 3 completed successfully.
+
+...Buffer Management tests completely successfully.
+
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java DBTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.DBTest
+
+Running Disk Space Management tests....
+
+Replacer: Clock
+
+
+  Test 1 creates a new database and does some tests of normal operations:
+  - Add some file entries
+  - Allocate a run of pages
+  - Write something on some of them
+  - Deallocate the rest of them
+  Test 1 completed successfully.
+
+  Test 2 opens the database created in test 1 and does some further tests:
+  - Delete some of the file entries
+  - Look up file entries that should still be there
+  - Read stuff back from pages we wrote in test 1
+  Test 2 completed successfully.
+
+  Test 3 tests for some error conditions:
+  - Look up a deleted file entry
+**** Looking up a deleted file entry
+  --> Failed as expected 
+
+  - Try to delete a deleted entry again
+**** Delete a deleted file entry again
+  --> Failed as expected 
+
+  - Try to delete a nonexistent file entry
+**** Deleting a nonexistent file entry
+  --> Failed as expected 
+
+  - Look up a nonexistent file entry
+**** Looking up a nonexistent file entry
+  --> Failed as expected 
+
+  - Try to add a file entry that's already there
+**** Adding a duplicate file entry
+  --> Failed as expected 
+
+  - Try to add a file entry whose name is too long
+**** Adding a file entry with too long a name
+  --> Failed as expected 
+
+  - Try to allocate a run of pages that's too long 
+**** Allocating a run that's too long
+  --> Failed as expected 
+
+  - Try to allocate a negative run of pages 
+**** Allocating a negative run
+  --> Failed as expected 
+
+  - Try to deallocate a negative run of pages 
+**** Deallocating a negative run
+  --> Failed as expected 
+
+  Test 3 completed successfully.
+
+  Test 4 tests some boundary conditions.
+    (These tests are very implementation-specific.)
+  - Make sure no pages are pinned
+  - Allocate all pages remaining after DB overhead is accounted for
+  - Attempt to allocate one more page
+**** Allocating one additional page
+  --> Failed as expected 
+
+  - Free some of the allocated pages
+  - Allocate some of the just-freed pages
+  - Free two continued run of the allocated pages
+  - Allocate back number of pages equal to the just freed pages
+
+  - Add enough file entries that the directory must surpass a page
+  - Make sure that the directory has taken up an extra page: try to
+    allocate more pages than should be available
+**** Allocating more pages than are now available
+   --> Failed as expected 
+
+  - At this point, all pages should be claimed.  Try to allocateone more.
+**** Allocating one more page than there is
+   --> Failed as expected 
+
+  - Free the last two pages: this tests a boundary condition in the space map.
+  Test 4 completed successfully.
+
+...Disk Space Management tests completely successfully.
+
+make[1]: Leaving directory '/home/hp/cse510_bigtable/src/tests'
+hp
+make[1]: Entering directory '/home/hp/cse510_bigtable/src/tests'
+/usr/lib/jvm/java-8-openjdk-amd64/bin/javac -classpath .:.. TestDriver.java HFTest.java
+/usr/lib/jvm/java-8-openjdk-amd64/bin/java  -classpath .:.. tests.HFTest
+
+Running Heap File tests....
+
+Replacer: Clock
+
+
+  Test 1: Insert and scan fixed-size records
+
+  - Create a heap file
+
+  - Add 10 records to the file
+
+0-------0
+slotNo 0 lemgth 12 offset 1012
+0-------0
+slotNo 0 lemgth 82 offset 942
+global.MID@7b23ec81Test1
+1-------1
+slotNo 1 lemgth 82 offset 860
+global.MID@6acbcfc0Test1
+2-------2
+slotNo 2 lemgth 82 offset 778
+global.MID@5f184fc6Test1
+3-------3
+slotNo 3 lemgth 82 offset 696
+global.MID@3feba861Test1
+4-------4
+slotNo 4 lemgth 82 offset 614
+global.MID@5b480cf9Test1
+5-------5
+slotNo 5 lemgth 82 offset 532
+global.MID@6f496d9fTest1
+6-------6
+slotNo 6 lemgth 82 offset 450
+global.MID@723279cfTest1
+7-------7
+slotNo 7 lemgth 82 offset 368
+global.MID@10f87f48Test1
+8-------8
+slotNo 8 lemgth 82 offset 286
+global.MID@b4c966aTest1
+9-------9
+slotNo 9 lemgth 82 offset 204
+global.MID@2f4d3709Test1
+  - Scan the records just inserted
+
+row ---------------------->>
